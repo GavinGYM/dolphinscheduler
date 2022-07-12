@@ -631,12 +631,14 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
             return result;
         }
 
-        projectUserMapper.deleteProjectRelation(0, userId);
-
         if (check(result, StringUtils.isEmpty(projectIds), Status.SUCCESS)) {
             return result;
         }
         Arrays.stream(projectIds.split(",")).distinct().forEach(projectId -> {
+            ProjectUser projectUserOld = projectUserMapper.queryProjectRelation(Integer.parseInt(projectId), userId);
+            if (projectUserOld != null) {
+                projectUserMapper.deleteProjectRelation(Integer.parseInt(projectId), userId);
+            }
             Date now = new Date();
             ProjectUser projectUser = new ProjectUser();
             projectUser.setUserId(userId);
@@ -676,12 +678,14 @@ public class UsersServiceImpl extends BaseServiceImpl implements UsersService {
             return result;
         }
 
-        projectUserMapper.deleteProjectRelation(0, userId);
-
         if (check(result, StringUtils.isEmpty(projectIds), Status.SUCCESS)) {
             return result;
         }
         Arrays.stream(projectIds.split(",")).distinct().forEach(projectId -> {
+            ProjectUser projectUserOld = projectUserMapper.queryProjectRelation(Integer.parseInt(projectId), userId);
+            if (projectUserOld != null) {
+                projectUserMapper.deleteProjectRelation(Integer.parseInt(projectId), userId);
+            }
             Date now = new Date();
             ProjectUser projectUser = new ProjectUser();
             projectUser.setUserId(userId);
