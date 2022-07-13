@@ -198,10 +198,20 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         if (project == null) {
             putMsg(result, Status.PROJECT_NOT_FOUND, "");
         } else {
+            // case 1: user is admin
+            if (loginUser.getUserType() == UserType.ADMIN_USER) {
+                return true;
+            }
+            // case 2: user is project owner
+            if (project.getUserId() == loginUser.getId()) {
+                return true;
+            }
+            // case 3: check user permission level
             ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), loginUser.getId());
 //            if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)){
-            if(projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION) {
+            if(projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION || projectUser == null) {
                 putMsg(result, Status.USER_NO_OPERATION_PROJECT_PERM, loginUser.getUserName(), project.getCode());
+                checkResult = false;
             }
             else {
                 checkResult = true;
@@ -289,7 +299,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
                 ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), userId);
                 if (projectUser == null) {
                     // in this case, the user is the project owner, maybe it's better to set it to ALL_PERMISSION.
-                    project.setPerm(0);
+                    project.setPerm(Constants.DEFAULT_ADMIN_PERMISSION);
                 }
                 else {
                     project.setPerm(projectUser.getPerm());
