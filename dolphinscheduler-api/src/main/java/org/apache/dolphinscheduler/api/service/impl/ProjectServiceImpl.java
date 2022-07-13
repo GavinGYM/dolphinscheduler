@@ -197,10 +197,15 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         boolean checkResult = false;
         if (project == null) {
             putMsg(result, Status.PROJECT_NOT_FOUND, "");
-        } else if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)) {
-            putMsg(result, Status.USER_NO_OPERATION_PROJECT_PERM, loginUser.getUserName(), project.getCode());
         } else {
-            checkResult = true;
+            ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), loginUser.getId());
+//            if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)){
+            if(projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION) {
+                putMsg(result, Status.USER_NO_OPERATION_PROJECT_PERM, loginUser.getUserName(), project.getCode());
+            }
+            else {
+                checkResult = true;
+            }
         }
         return checkResult;
     }
@@ -314,9 +319,9 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         Map<String, Object> result = new HashMap<>();
         Project project = projectMapper.queryByCode(projectCode);
 
-        Map<String, Object> checkResult = getCheckResult(loginUser, project,PROJECT_DELETE);
-        if (checkResult != null) {
-            return checkResult;
+        boolean hasProjectAndPerm = hasProjectAndPerm(loginUser, project, result,PROJECT_UPDATE);
+        if (!hasProjectAndPerm) {
+            return result;
         }
 
         List<ProcessDefinition> processDefinitionList = processDefinitionMapper.queryAllDefinitionList(project.getCode());
