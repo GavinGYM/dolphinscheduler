@@ -192,8 +192,22 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         return result;
     }
 
+
     @Override
     public boolean hasProjectAndPerm(User loginUser, Project project, Map<String, Object> result,String perm) {
+        boolean checkResult = false;
+        if (project == null) {
+            putMsg(result, Status.PROJECT_NOT_FOUND, "");
+        } else if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)) {
+            putMsg(result, Status.USER_NO_OPERATION_PROJECT_PERM, loginUser.getUserName(), project.getCode());
+        } else {
+            checkResult = true;
+        }
+        return checkResult;
+    }
+
+    @Override
+    public boolean hasProjectAndWritePerm(User loginUser, Project project, Map<String, Object> result) {
         boolean checkResult = false;
         if (project == null) {
             putMsg(result, Status.PROJECT_NOT_FOUND, "");
@@ -210,7 +224,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
             ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), loginUser.getId());
 //            if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)){
             if(projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION || projectUser == null) {
-                putMsg(result, Status.USER_NO_OPERATION_PROJECT_PERM, loginUser.getUserName(), project.getCode());
+                putMsg(result, Status.USER_NO_WRITE_PROJECT_PERM, loginUser.getUserName(), project.getName());
                 checkResult = false;
             }
             else {
@@ -329,8 +343,8 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         Map<String, Object> result = new HashMap<>();
         Project project = projectMapper.queryByCode(projectCode);
 
-        boolean hasProjectAndPerm = hasProjectAndPerm(loginUser, project, result,PROJECT_UPDATE);
-        if (!hasProjectAndPerm) {
+        boolean hasProjectAndWritePerm = hasProjectAndWritePerm(loginUser, project, result);
+        if (!hasProjectAndWritePerm) {
             return result;
         }
 
@@ -385,8 +399,8 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
         }
 
         Project project = projectMapper.queryByCode(projectCode);
-        boolean hasProjectAndPerm = hasProjectAndPerm(loginUser, project, result,PROJECT_UPDATE);
-        if (!hasProjectAndPerm) {
+        boolean hasProjectAndWritePerm = hasProjectAndWritePerm(loginUser, project, result);
+        if (!hasProjectAndWritePerm) {
             return result;
         }
         Project tempProject = projectMapper.queryByName(projectName);
