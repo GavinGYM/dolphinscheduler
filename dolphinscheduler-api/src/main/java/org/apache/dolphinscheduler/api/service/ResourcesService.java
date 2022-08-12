@@ -19,6 +19,7 @@ package org.apache.dolphinscheduler.api.service;
 
 import org.apache.dolphinscheduler.api.utils.Result;
 import org.apache.dolphinscheduler.common.enums.ProgramType;
+import org.apache.dolphinscheduler.dao.entity.Resource;
 import org.apache.dolphinscheduler.dao.entity.User;
 import org.apache.dolphinscheduler.spi.enums.ResourceType;
 
@@ -69,6 +70,9 @@ public interface ResourcesService {
                                   MultipartFile file,
                                   int pid,
                                   String currentDir);
+
+
+    boolean hasResourceAndWritePerm(User loginUser, Resource resource, Result<Object> result);
 
     /**
      * update resource
