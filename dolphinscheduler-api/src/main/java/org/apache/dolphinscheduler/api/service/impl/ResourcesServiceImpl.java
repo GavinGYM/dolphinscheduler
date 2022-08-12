@@ -372,15 +372,21 @@ public class ResourcesServiceImpl extends BaseServiceImpl implements ResourcesSe
             putMsg(result, Status.NO_CURRENT_OPERATING_PERMISSION);
             return result;
         }
+
         result = checkResourceUploadStartupState();
         if (!result.getCode().equals(Status.SUCCESS.getCode())) {
             return result;
         }
 
-
         Resource resource = resourcesMapper.selectById(resourceId);
         if (resource == null) {
             putMsg(result, Status.RESOURCE_NOT_EXIST);
+            return result;
+        }
+
+        //Check User's permission level on the file
+        boolean hasResourceAndWritePerm = hasResourceAndWritePerm(loginUser, resource, result);
+        if (!hasResourceAndWritePerm) {
             return result;
         }
 
@@ -808,6 +814,12 @@ public class ResourcesServiceImpl extends BaseServiceImpl implements ResourcesSe
             return resultCheck;
         }
 
+        //Check User's permission level on the file
+        boolean hasResourceAndWritePerm = hasResourceAndWritePerm(loginUser, resource, resultCheck);
+        if (!hasResourceAndWritePerm) {
+            return resultCheck;
+        }
+
         Result<Object> result = checkResourceUploadStartupState();
         if (!result.getCode().equals(Status.SUCCESS.getCode())) {
             return result;
@@ -1201,6 +1213,13 @@ public class ResourcesServiceImpl extends BaseServiceImpl implements ResourcesSe
             putMsg(result, Status.NO_CURRENT_OPERATING_PERMISSION);
             return result;
         }
+
+        //Check User's permission level on the file
+        boolean hasResourceAndWritePerm = hasResourceAndWritePerm(loginUser, resource, result);
+        if (!hasResourceAndWritePerm) {
+            return result;
+        }
+
         //check can edit by file suffix
         String nameSuffix = Files.getFileExtension(resource.getAlias());
         String resourceViewSuffixes = FileUtils.getResourceViewSuffixes();
