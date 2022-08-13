@@ -223,7 +223,7 @@ public class ProjectServiceImpl extends BaseServiceImpl implements ProjectServic
             // case 3: check user permission level
             ProjectUser projectUser = projectUserMapper.queryProjectRelation(project.getId(), loginUser.getId());
 //            if (!canOperatorPermissions(loginUser, new Object[]{project.getId()},AuthorizationType.PROJECTS,perm)){
-            if(projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION || projectUser == null) {
+            if(projectUser == null || projectUser.getPerm()!=Constants.DEFAULT_ADMIN_PERMISSION) {
                 putMsg(result, Status.USER_NO_WRITE_PROJECT_PERM, loginUser.getUserName(), project.getName());
                 checkResult = false;
             }
